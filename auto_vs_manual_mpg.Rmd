@@ -1,0 +1,95 @@
+---
+title: "MPG consumption analysis betweeen automatic and manual transmissions"
+author: "Ridzuan Mohamad"
+date: "3/19/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(datasets)
+
+data("mtcars")
+```
+
+## Introduction
+The Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+1. Is an automatic or manual transmission better for MPG
+2. Quantify the MPG difference between automatic and manual transmissions
+
+## Data Analysis & Exploratory
+The dataset consist of 11 variables but we only interested only a few variable such as _mpg, cyl, hp, wt, am and gear_. The detail description for the variable as describe in **Appendex A and B**
+
+```{r}
+mtcars_clean <- subset(mtcars, select = c("mpg", "cyl", "hp", "wt", "am", "gear"))
+```
+
+Than, calculate the mean for both transmission type. The boxplot graph as shown in **Appendix C**
+```{r}
+c(automatic = mean(mtcars[mtcars$am==0,]$mpg), 
+    manual = mean(mtcars[mtcars$am==1,]$mpg))
+```
+
+The result shows that the automatic transmission is better than manual transmission in gas consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test.
+
+```{r}
+t.test(mtcars[mtcars$am==0,]$mpg, mtcars[mtcars$am==1,]$mpg)
+```
+
+The _p-value_ from the T-Test is less than 0.005 so have to reject the $H_0$
+
+## Regression Model
+
+Let creat 2 models for our case:-
+
+1. model.simple which is mpg as outcome and am as predictor.
+2. model.full which is mpg as outcome and other variables as predictor
+
+```{r}
+model.simple <- lm(mpg ~ am, data = mtcars_clean)
+model.all <- lm(mpg ~ ., data = mtcars_clean)
+```
+
+```{r}
+anova(model.simple, model.all)
+```
+
+## Summary
+
+# Appendix
+
+### Appendix A
+Variable | Description
+---------|----------------------
+mpg      | Miles/(US) gallon
+cyl	     | Number of cylinders
+hp	     | Gross horsepower
+wt	     | Weight (1000 lbs)
+am	     | Transmission (0 = automatic, 1 = manual
+gear	 | Number of forward gears
+
+### Appendix B
+```{r}
+str(mtcars)
+```
+
+### Appendix C
+```{r}
+with(mtcars, boxplot(mpg ~ am, xlab="Transmission", ylab="MPG",
+        main="MPG vs. Transmission Type"))
+```
+
+### Appendix D
+```{r}
+summary(model.simple)
+summary(model.all)
+```
+
+```{r}
+ggplot(mtcars_clean, aes(y=mpg, x=factor(am, labels = c("automatic", "manual")), fill=factor(am)))+
+        geom_violin(colour="black")+
+        xlab("transmission") + ylab("MPG")
+```
