@@ -21,47 +21,42 @@ The Motor Trend, a magazine about the automobile industry. Looking at a data set
 2. Quantify the MPG difference between automatic and manual transmissions
 
 ## Data Analysis & Exploratory
-The dataset consist of 11 variables but we only interested only a few variable such as _mpg, cyl, hp, wt, am and gear_. The detail description for the variable as describe in **Appendex A and B**
+The dataset consist of 11 variables but we only interested only a few variable such as _mpg, cyl, hp, wt, am and gear_. The detail description for the variable as describe in _Appendix A and Appendix B_
 
 ```{r}
 mtcars_clean <- subset(mtcars, select = c("mpg", "cyl", "hp", "wt", "am", "gear"))
 ```
 
-Than, calculate the mean for both transmission type. The boxplot graph as shown in **Appendix C**
+Than, calculate the mean for both transmission type and plot the boxplot to visualized the pattern for both transmission types. _(refer Appendix C)_
 ```{r}
-c(automatic = mean(mtcars[mtcars$am==0,]$mpg), 
-    manual = mean(mtcars[mtcars$am==1,]$mpg))
+c(automatic = mean(mtcars[mtcars$am==0,]$mpg), manual = mean(mtcars[mtcars$am==1,]$mpg))
 ```
 
-The result shows that the automatic transmission is better than manual transmission in gas consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test.
+The result shows that the automatic transmission is better than manual transmission in gas consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test and the probability of Type 1 error is ($\alpha = 0.05$)
 
 ```{r}
-t.test(mtcars[mtcars$am==0,]$mpg, mtcars[mtcars$am==1,]$mpg)
+hypo.result <- t.test(mtcars[mtcars$am==0,]$mpg, mtcars[mtcars$am==1,]$mpg)
+hypo.result$p.value
 ```
 
-The _p-value_ from the T-Test is less than 0.005 so have to reject the $H_0$
+However the hypothesis testing show that the _p-value_ < $\alpha$ which force us to reject the $H_0$.
 
 ## Regression Model
 
-Let creat 2 models for our case:-
-
-1. model.simple which is mpg as outcome and am as predictor.
-2. model.full which is mpg as outcome and other variables as predictor
+Firstly, we have to choose a right model by using R step() function.
 
 ```{r}
-model.simple <- lm(mpg ~ am, data = mtcars_clean)
-model.all <- lm(mpg ~ ., data = mtcars_clean)
+best.model <- step(lm(mpg ~ ., data = mtcars_clean), trace=0)
+summary(best.model)
 ```
 
-```{r}
-anova(model.simple, model.all)
-```
+The Adjusted R-squared value shows that 83% of the variance of the MPG variable. Which mean the variable _cyl, hp and wt_ have a correlation affect between _mpg_ and _am_ (transmission type).
 
 ## Summary
 
 # Appendix
 
-### Appendix A
+### Appendix A - Selected Variable and Description
 Variable | Description
 ---------|----------------------
 mpg      | Miles/(US) gallon
@@ -71,25 +66,24 @@ wt	     | Weight (1000 lbs)
 am	     | Transmission (0 = automatic, 1 = manual
 gear	 | Number of forward gears
 
-### Appendix B
+### Appendix B - mtcars data structure
 ```{r}
 str(mtcars)
 ```
 
-### Appendix C
+### Appendix C - Boxplot MPG vs. Transmission Type
 ```{r}
-with(mtcars, boxplot(mpg ~ am, xlab="Transmission", ylab="MPG",
-        main="MPG vs. Transmission Type"))
+ggplot(mtcars, aes(x = factor(am, labels=c("automatic", "manual")), y = mpg, 
+                   fill=factor(am, labels=c("automatic", "manual")))) +
+    geom_boxplot() +
+    scale_x_discrete(name = "Transmission") +
+    scale_y_continuous(name = "MPG - Miles per Gallon") +
+    ggtitle("MPG vs. Transmission Type") +
+    theme(legend.title=element_blank())
 ```
 
-### Appendix D
+### Appendix D - Model's Summary 
 ```{r}
-summary(model.simple)
-summary(model.all)
-```
-
-```{r}
-ggplot(mtcars_clean, aes(y=mpg, x=factor(am, labels = c("automatic", "manual")), fill=factor(am)))+
-        geom_violin(colour="black")+
-        xlab("transmission") + ylab("MPG")
+summary(lm(mpg ~ am, mtcars))
+summary(best.model)
 ```
