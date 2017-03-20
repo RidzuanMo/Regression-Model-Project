@@ -21,13 +21,12 @@ The Motor Trend, a magazine about the automobile industry. Looking at a data set
 2. Quantify the MPG difference between automatic and manual transmissions
 
 ## Data Analysis & Exploratory
-The dataset consist of 11 variables but we only interested only a few variable such as _mpg, cyl, hp, wt, am and gear_. The detail description for the variable as describe in _Appendix A and Appendix B_
-
+The dataset consist of `r dim(mtcars)[2]` and `r dim(mtcars)[1]` observation data. The detail for each variable as per Appendix A.
 ```{r}
-mtcars_clean <- subset(mtcars, select = c("mpg", "cyl", "hp", "wt", "am", "gear"))
+str(mtcars)
 ```
 
-Than, calculate the mean for both transmission type and plot the boxplot to visualized the pattern for both transmission types. _(refer Appendix C)_
+Than, calculate the mean for both transmission type and plot the boxplot to visualized the pattern for both transmission types. _(refer Appendix B)_
 ```{r}
 c(automatic = mean(mtcars[mtcars$am==0,]$mpg), manual = mean(mtcars[mtcars$am==1,]$mpg))
 ```
@@ -43,35 +42,50 @@ However the hypothesis testing show that the _p-value_ < $\alpha$ which force us
 
 ## Regression Model
 
-Firstly, we have to choose a right model by using R step() function.
+Firstly, let look at the linear model that corespond to our $H_0$._(Appendix D)_ 
 
 ```{r}
-best.model <- step(lm(mpg ~ ., data = mtcars_clean), trace=0)
-summary(best.model)
+model.0 <- lm(mpg ~ am, mtcars)
+result.0 <- summary(model.0)
 ```
 
-The Adjusted R-squared value shows that 83% of the variance of the MPG variable. Which mean the variable _cyl, hp and wt_ have a correlation affect between _mpg_ and _am_ (transmission type).
+The Adjusted R-squared = `r result.0$adj.r.squared`. It shows that the model only able to explain 34% of the variance. 
+
+So, we have to include other variable to our model by using R step() function.
+
+```{r}
+best.model <- step(lm(mpg ~ ., data = mtcars), trace=0)
+result.1 <- summary(best.model)
+result.1
+```
+
+The Adjusted R-squared = `r result.1$adj.r.squared` shows that 83% of the variance of the MPG variable. Which mean the variable _wt, qsec and am_ have a correlation affect on _mpg_.
 
 ## Summary
+
+Based on the _best.model_ we created; we can assumed that the automatic transmission is `r coef(result.1)[4]` mpg better than manual transmission.
+
+\newpage
 
 # Appendix
 
 ### Appendix A - Selected Variable and Description
-Variable | Description
----------|----------------------
-mpg      | Miles/(US) gallon
-cyl	     | Number of cylinders
-hp	     | Gross horsepower
-wt	     | Weight (1000 lbs)
-am	     | Transmission (0 = automatic, 1 = manual
-gear	 | Number of forward gears
 
-### Appendix B - mtcars data structure
-```{r}
-str(mtcars)
-```
+No.| Variable | Description
+---|----------|----------------------
+1. |mpg      | Miles/(US) gallon
+2. |cyl	     | Number of cylinders
+3. |disp	 | Displacement (cu.in.)
+4. |hp	     | Gross horsepower
+5. |drat	 | Rear axle ratio
+6. |wt	     | Weight (1000 lbs)
+7. |qsec	 | 1/4 mile time
+8. |vs	     | V/S
+9. |am	     | Transmission (0 = automatic, 1 = manual
+10. |gear	 | Number of forward gears
+11. |carb	 | Number of carburetors
 
-### Appendix C - Boxplot MPG vs. Transmission Type
+### Appendix B - Boxplot MPG vs. Transmission Type
 ```{r}
 ggplot(mtcars, aes(x = factor(am, labels=c("automatic", "manual")), y = mpg, 
                    fill=factor(am, labels=c("automatic", "manual")))) +
