@@ -15,13 +15,13 @@ data("mtcars")
 ```
 
 ## Introduction
-The Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+The Motor Trend, a magazine about the automobile industry are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). The data set of collection of cars (**mtcars**) is used for this study, The focus are particularly interested in the following two questions:
 
 1. Is an automatic or manual transmission better for MPG
 2. Quantify the MPG difference between automatic and manual transmissions
 
 ## Data Analysis & Exploratory
-The dataset consist of `r dim(mtcars)[2]` and `r dim(mtcars)[1]` observation data. The detail for each variable as per Appendix A.
+The dataset consist of `r dim(mtcars)[2]` and `r dim(mtcars)[1]` observation data. The detail description for each variable as per _Appendix A_. Now, let look on the dataset structure.
 ```{r}
 str(mtcars)
 ```
@@ -31,7 +31,7 @@ Than, calculate the mean for both transmission type and plot the boxplot to visu
 c(automatic = mean(mtcars[mtcars$am==0,]$mpg), manual = mean(mtcars[mtcars$am==1,]$mpg))
 ```
 
-The result shows that the automatic transmission is better than manual transmission in gas consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test and the probability of Type 1 error is ($\alpha = 0.05$)
+The result from mean calculation and boxplot shows that the automatic transmission is better than manual transmission in _mpg_ consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test and the probability of Type 1 error is ($\alpha = 0.05$)
 
 ```{r}
 hypo.result <- t.test(mtcars[mtcars$am==0,]$mpg, mtcars[mtcars$am==1,]$mpg)
@@ -45,6 +45,10 @@ However the hypothesis testing show that the _p-value_ < $\alpha$ which force us
 Firstly, let look at the linear model that corespond to our $H_0$._(Appendix D)_ 
 
 ```{r}
+# factor variable am
+mtcars$am <- as.factor(mtcars$am) 
+
+#create a simple model
 model.0 <- lm(mpg ~ am, mtcars)
 result.0 <- summary(model.0)
 ```
@@ -63,7 +67,7 @@ The Adjusted R-squared = `r result.1$adj.r.squared` shows that 83% of the varian
 
 ## Summary
 
-Based on the _best.model_ we created; we can assumed that the automatic transmission is `r coef(result.1)[4]` mpg better than manual transmission.
+Based on the Coefficients table for _best.model_ and looking at categorical variables ***am1***, we can assumed that the manual transmission is `r coef(result.1)[4]` mpg better than automatic transmission.
 
 \newpage
 
@@ -100,4 +104,11 @@ ggplot(mtcars, aes(x = factor(am, labels=c("automatic", "manual")), y = mpg,
 ```{r}
 summary(lm(mpg ~ am, mtcars))
 summary(best.model)
+```
+
+### Appendix E - Residuals
+
+```{r}
+par(mfrow = c(2,2))
+plot(best.model)
 ```
