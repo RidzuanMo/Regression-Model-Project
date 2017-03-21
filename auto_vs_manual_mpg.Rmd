@@ -22,18 +22,23 @@ The Motor Trend, a magazine about the automobile industry are interested in expl
 
 ## Data Analysis & Exploratory
 The dataset consist of `r dim(mtcars)[2]` and `r dim(mtcars)[1]` observation data. The detail description for each variable as per _Appendix A_. Now, let look on the dataset structure.
+
 ```{r}
+# Display Structure
 str(mtcars)
 ```
 
 Than, calculate the mean for both transmission type and plot the boxplot to visualized the pattern for both transmission types. _(refer Appendix B)_
+
 ```{r}
+# Calculate mean for both transmission type
 c(automatic = mean(mtcars[mtcars$am==0,]$mpg), manual = mean(mtcars[mtcars$am==1,]$mpg))
 ```
 
 The result from mean calculation and boxplot shows that the automatic transmission is better than manual transmission in _mpg_ consumption. Let take that as our Null Hypothesis ( $H_0$). Now we test the $H_0$ with T-Test and the probability of Type 1 error is ($\alpha = 0.05$)
 
 ```{r}
+# Hypothesis Test
 hypo.result <- t.test(mtcars[mtcars$am==0,]$mpg, mtcars[mtcars$am==1,]$mpg)
 hypo.result$p.value
 ```
@@ -58,6 +63,7 @@ The Adjusted R-squared = `r result.0$adj.r.squared`. It shows that the model onl
 So, we have to include other variable to our model by using R step() function.
 
 ```{r}
+# Selecting the best multi variable model
 best.model <- step(lm(mpg ~ ., data = mtcars), trace=0)
 result.1 <- summary(best.model)
 result.1
@@ -102,7 +108,10 @@ ggplot(mtcars, aes(x = factor(am, labels=c("automatic", "manual")), y = mpg,
 
 ### Appendix D - Model's Summary 
 ```{r}
-summary(lm(mpg ~ am, mtcars))
+# Summary of simple model
+summary(model.0)
+
+# Summary of multi variable model
 summary(best.model)
 ```
 
